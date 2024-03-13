@@ -1,0 +1,3 @@
+/home/nedelcu/work/projects/licenta_clean/testing/state_from_side_picture/CMakeFiles/main.dir
+/home/nedelcu/work/projects/licenta_clean/testing/state_from_side_picture/CMakeFiles/edit_cache.dir
+/home/nedelcu/work/projects/licenta_clean/testing/state_from_side_picture/CMakeFiles/rebuild_cache.dir

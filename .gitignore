@@ -1,0 +1,7 @@
+./testing/state_from_side_picture/main
+./testing/state_from_side_picture/build.ninja
+./testing/state_from_side_picture/CMakeCache.txt
+./testing/state_from_side_picture/avg_colors.bmp
+./testing/state_from_side_picture/cmake_install.cmake
+./testing/state_from_side_picture/Testing/*
+./testing/state_from_side_picture/CMakeFiles/*
