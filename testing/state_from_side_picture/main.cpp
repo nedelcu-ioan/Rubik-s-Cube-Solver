@@ -36,15 +36,32 @@ sim dor(const c&) { ris; }
 };
 #define imie(...) " [" << #__VA_ARGS__ ": " << (__VA_ARGS__) << "] "
 
+const std::vector<cv::Scalar> rubiks_cube_hsv_color_from_testing = {
+        cv::Scalar(175.38255555555554, 190.29855555555554, 173.24533333333332), // Red
+        cv::Scalar(78.68033333333334, 254.65977777777778, 196.2613333333333),   // Green
+        cv::Scalar(103.82122222222223, 254.6348888888889, 237.01533333333333),  // Blue
+        cv::Scalar(45.80347777777777, 159.54211111111113, 228.0294444444445),    // Yellow
+        cv::Scalar(4.253168888888889, 171.7713333333333, 250.2893333333333),    // Orange
+        cv::Scalar(30.969644444444448, 4.580559666666667, 222.66044444444444),  // White
+};
 
 const std::vector<std::pair<cv::Scalar, cv::Scalar>> rubiks_cube_hsv_color_ranges = {
-        {cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255)},   // Red
-        {cv::Scalar(45, 100, 100), cv::Scalar(75, 255, 255)},  // Green
-        {cv::Scalar(105, 100, 100), cv::Scalar(135, 255, 255)},// Blue
-        {cv::Scalar(15, 100, 100), cv::Scalar(30, 255, 255)},  // Yellow
-        {cv::Scalar(0, 100, 100), cv::Scalar(15, 255, 255)},   // Orange
-        {cv::Scalar(0, 0, 200), cv::Scalar(179, 30, 255)}      // White
+        {cv::Scalar(173, 100, 100), cv::Scalar(177, 255, 255)},   // Red
+        {cv::Scalar(75, 100, 100), cv::Scalar(80, 255, 255)},  // Green
+        {cv::Scalar(102, 100, 100), cv::Scalar(135, 255, 255)},// Blue
+        {cv::Scalar(43, 100, 100), cv::Scalar(50, 255, 255)},  // Yellow
+        {cv::Scalar(0, 100, 100), cv::Scalar(6, 255, 255)},   // Orange
+
+        {cv::Scalar(0, 0, 255 - 15), cv::Scalar(255,  255 - 15, 255)}      // White
 };
+
+const std::vector<std::string>color_names = {"Red", "Green", "Blue", "Yellow", "Orange", "White"};
+
+double dotProduct(const cv::Scalar& scalar1, const cv::Scalar& scalar2) {
+    return  (double)scalar1[0] * (double)scalar2[0] +
+            (double)scalar1[1] * (double)scalar2[1] +
+            (double)scalar1[2] * (double)scalar2[2];
+}
 
 std::string closestRubiksColor(const cv::Scalar& query_color) {
     double min_distance = std::numeric_limits<double>::max();
@@ -52,22 +69,43 @@ std::string closestRubiksColor(const cv::Scalar& query_color) {
 
     for (size_t i = 0; i < rubiks_cube_hsv_color_ranges.size(); ++i) {
         double distance = 0.0;
-        for (int j = 0; j < 3; ++j) {
+        for (size_t j = 0; j < 3; ++j) {
             double min_val = rubiks_cube_hsv_color_ranges[i].first[j];
             double max_val = rubiks_cube_hsv_color_ranges[i].second[j];
             double query_val = query_color[j];
 
             if (query_val < min_val)
-                distance += std::pow(min_val - query_val, 2);
+                distance += std::pow(min_val - query_val, 2.0 * (3.00 - (double)j));
             else if (query_val > max_val)
-                distance += std::pow(query_val - max_val, 2);
+                distance += std::pow(query_val - max_val, 2.0 * (3.00 - (double)j));
         }
 
         distance = std::sqrt(distance);
 
         if (distance < min_distance) {
             min_distance = distance;
-            closest_color = i < rubiks_cube_hsv_color_ranges.size() - 1 ? std::to_string(i) : "White";
+            closest_color = color_names[i];
+        }
+    }
+
+    return closest_color;
+}
+
+std::string closestRubiksColorv2(const cv::Scalar& query_color) {
+    double min_distance = std::numeric_limits<double>::max();
+    std::string closest_color;
+
+    for (size_t i = 0; i < rubiks_cube_hsv_color_from_testing.size(); ++i) {
+        double distance = 0.0;
+        for (size_t j = 0; j < 3; ++j) {
+            double test_value = rubiks_cube_hsv_color_from_testing[i][j];
+            double query_val = query_color[j];
+            distance += pow(test_value - query_val, 2.00 * (3.00 - (double)j));
+        }
+
+        if (distance < min_distance) {
+            min_distance = distance;
+            closest_color = color_names[i];
         }
     }
 
@@ -78,10 +116,6 @@ std::string closestRubiksColor(const cv::Scalar& query_color) {
 const int num_rows = 3;
 const int num_cols = 3;
 
-
-double dotProduct(const cv::Scalar& scalar1, const cv::Scalar& scalar2) {
-    return (double)scalar1[0] * (double)scalar2[0] + (double)scalar1[1] * (double)scalar2[1] + (double)scalar1[2] * (double)scalar2[2];
-}
 
 
 cv::Scalar calculateAverageColorFromHSVImage(const cv::Mat& image, const cv::Rect& rect) {
@@ -123,6 +157,8 @@ std::vector<cv::Scalar> extractAverageColors(const cv::Mat& image, const std::st
             cv::rectangle(region_image, cell_region, avg_color, cv::FILLED);
             cv::rectangle(region_image, cell_region, cv::Scalar(0, 0, 0), 2);
 
+            //cout << "row: " << i << " -- col: " << j << endl;
+//            cout << "(" << closestRubiksColor(avg_color) << "," << closestRubiksColorv2(avg_color) << ")";
             cout << closestRubiksColor(avg_color) << " ";
         }
         cout << endl;
